@@ -1,0 +1,146 @@
+---
+title: "evogeno Project"
+author: "Sophia Halling,"
+date: "2024-04-22"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+# 1-2 paragraph motivating reasons
+
+# 2-3 paragraph introduction
+
+#Methods
+
+## libraries
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(plotly)
+```
+
+## Neon table setup
+
+### NEON table
+```{r}
+NEON_MAGs <- read_csv("data/NEON/GOLD_Study_ID_Gs0161344_NEON_edArchaea.csv") %>% 
+  # remove columns that are not needed for data analysis
+  select(-c(`GOLD Study ID`, `Bin Methods`, `Created By`, `Date Added`)) %>% 
+  # create a new column with the Assembly Type
+  mutate("Assembly Type" = case_when(`Genome Name` == "NEON combined assembly" ~ `Genome Name`,
+                            TRUE ~ "Individual")) %>% 
+  mutate_at("Assembly Type", str_replace, "NEON combined assembly", "Combined") %>% 
+  separate(`GTDB-Tk Taxonomy Lineage`, c("Domain", "Phylum", "Class", "Order", "Family", "Genus"), "; ", remove = FALSE) %>% 
+  # Get rid of the the common string "Soil microbial communities from "
+  mutate_at("Genome Name", str_replace, "Terrestrial soil microbial communities from ", "") %>% 
+  # Use the first `-` to split the column in two
+  separate(`Genome Name`, c("Site","Sample Name"), " - ") %>% 
+  # Get rid of the the common string "S-comp-1"
+  mutate_at("Sample Name", str_replace, "-comp-1", "") %>%
+  # separate the Sample Name into Site ID and plot info
+  separate(`Sample Name`, c("Site ID","subplot.layer.date"), "_", remove = FALSE,) %>% 
+  # separate the plot info into 3 columns
+  separate(`subplot.layer.date`, c("Subplot", "Layer", "Date"), "-") 
+```
+
+### NEON metagenome table
+
+```{r}
+NEON_metagenomes <- read_tsv("data/NEON/exported_img_data_Gs0161344_NEON.tsv") %>% 
+  rename(`Genome Name` = `Genome Name / Sample Name`) %>% 
+  filter(str_detect(`Genome Name`, 're-annotation', negate = T)) %>% 
+  filter(str_detect(`Genome Name`, 'WREF plot', negate = T)) 
+```
+
+```{r}
+NEON_metagenomes <- NEON_metagenomes %>% 
+  # Get rid of the the common string "Soil microbial communities from "
+  mutate_at("Genome Name", str_replace, "Terrestrial soil microbial communities from ", "") %>% 
+  # Use the first `-` to split the column in two
+  separate(`Genome Name`, c("Site","Sample Name"), " - ") %>% 
+  # Get rid of the the common string "-comp-1"
+  mutate_at("Sample Name", str_replace, "-comp-1", "") %>%
+  # separate the Sample Name into Site ID and plot info
+  separate(`Sample Name`, c("Site ID","subplot.layer.date"), "_", remove = FALSE,) %>% 
+  # separate the plot info into 3 columns
+  separate(`subplot.layer.date`, c("Subplot", "Layer", "Date"), "-") 
+```
+
+## NEON chemistry table
+
+```{r}
+NEON_chemistry <- read_tsv("data/NEON/neon_plot_soilChem1_metadata.tsv") %>% 
+  # remove -COMP from genomicsSampleID
+  mutate_at("genomicsSampleID", str_replace, "-COMP", "") 
+```
+
+Neon 
+Img
+Sankey
+Positcloud
+Rmarkdown
+filtering methods
+Zotero
+Pavian
+Screenshot of data/graphs and put code chunks in methods
+
+# Results
+
+## Possible question types
+
+Temperature, ecosystem, chemistry, ph
+
+Lab 12 metagenome +chemistry data tables (use Sophia’s exercise 8+)
+
+Question: 
+nitrogen% vs. organic C % (E11)
+
+Question: What is the relationship between the organic carbon percentage and nitrogen percentage in relation to bacteriodata families?
+
+Soil temperature vs. soil in cacl pH (E11)
+
+Question: Do soil temperatures and Calcium Chloride pH levels effect bacteropdota families?
+
+Soil in water pH vs. soil in cacl pH (E11)
+
+Question: 
+
+Nlcd class vs. soil in cacl pH (E10)
+
+Question: 
+
+
+#### Question:How does soil temperature affect the distribution of bacteroides?
+
+##### Graphs
+Site vs. temp (all phylums)
+soil temp vs. ecosystem
+
+Site id vs. soil temperature(bacteroidota only) (E8)
+
+Soil temp vs. ecosystem (all phylums)
+Distribution of various orders in bacteroidota based on soil temperature in different ecosystems (E9)
+
+Lab 15 trees  (not done yet)
+Sankey? (into or results?)
+Paragraphs talking about what each graph displays
+
+# Discussion
+Talk about results and what they mean
+
+# Conclusion
+Lab 10
+Big picture discussion
+References
+Zotero 
+lab 10/11
